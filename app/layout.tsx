@@ -13,8 +13,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ERD",
-  description: "Sign in to ERD",
+  title: "Figma",
+  description: "Sign in to Figma",
 };
 
 export default function RootLayout({
