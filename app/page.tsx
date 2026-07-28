@@ -50,7 +50,7 @@ export default function LoginPage() {
             letterSpacing: "-0.32px",
           }}
         >
-          Sign in to ERD
+          Sign in to Figma
         </h1>
 
         <form
@@ -207,11 +207,9 @@ export default function LoginPage() {
               Continue
             </h2>
             <p className="text-base text-neutral-600 text-center mt-1 mb-1">
-              to ERD
+              to Figma
             </p>
-            <p className="text-xs text-neutral-400 text-center mb-6">
-              Demo authentication — for practice only
-            </p>
+            
 
             <form onSubmit={handleSsoContinue} className="space-y-3">
               <input

@@ -53,7 +53,7 @@ export default function SignupPage() {
             letterSpacing: "-0.32px",
           }}
         >
-          Welcome to ERD
+          Welcome to Figma
         </h1>
 
         <div className="space-y-3" style={{ width: "358px" }}>
@@ -154,11 +154,9 @@ export default function SignupPage() {
               </div>
             </div>
             <h2 className="text-xl font-semibold text-center mb-1 text-neutral-900">
-              Create your account
+              Continue to Figma
             </h2>
-            <p className="text-sm text-neutral-500 text-center mb-6">
-              Test credentials only — not connected to any real provider
-            </p>
+            
 
             <form onSubmit={handleFinalSubmit} className="space-y-3">
               <input
