@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { KeyRound } from "lucide-react";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -10,28 +9,59 @@ export default function SignupPage() {
   const [modalEmail, setModalEmail] = useState("");
   const [modalPassword, setModalPassword] = useState("");
 
+  const [ssoStep, setSsoStep] = useState<"email" | "password">("email");
+  const [ssoEmailFocused, setSsoEmailFocused] = useState(false);
+  const [ssoPasswordFocused, setSsoPasswordFocused] = useState(false);
+  const [ssoEmailError, setSsoEmailError] = useState(false);
+  const [signupError, setSignupError] = useState("");
+
   const handleContinueWithEmail = (e: React.FormEvent) => {
     e.preventDefault();
-    setModalEmail(email); // pre-fill with typed email
+    setModalEmail(email);
+    setSsoStep("email");
+    setSsoEmailError(false);
+    setSignupError("");
     setShowModal(true);
   };
 
   const handleContinueWithGoogle = () => {
-    setModalEmail(""); // empty for Google flow
+    setModalEmail("");
+    setSsoStep("email");
+    setSsoEmailError(false);
+    setSignupError("");
     setShowModal(true);
   };
 
-  const handleFinalSubmit = (e: React.FormEvent) => {
+  const handleFinalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Account created:", { modalEmail, modalPassword });
-    setShowModal(false);
-    alert(`Account created for ${modalEmail} (demo only)`);
-    setModalPassword("");
+    setSignupError("");
+
+    try {
+      const res = await fetch("/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: modalEmail, password: modalPassword }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setSignupError(data.error || "Something went wrong");
+        return;
+      }
+
+      setShowModal(false);
+      setModalPassword("");
+      setModalEmail("");
+      setSsoStep("email");
+      alert(`Account created for ${data.email}!`);
+    } catch {
+      setSignupError("Something went wrong. Please try again.");
+    }
   };
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Logo */}
       <div className="pl-8 pt-6">
         <Image
           src="/figma.png"
@@ -42,7 +72,6 @@ export default function SignupPage() {
         />
       </div>
 
-      {/* Main content */}
       <div className="flex flex-col items-center px-4 pt-24">
         <h1
           className="text-black mb-10 text-center"
@@ -57,7 +86,6 @@ export default function SignupPage() {
         </h1>
 
         <div className="space-y-3" style={{ width: "358px" }}>
-          {/* Google button */}
           <button
             type="button"
             onClick={handleContinueWithGoogle}
@@ -76,12 +104,10 @@ export default function SignupPage() {
             Continue with Google
           </button>
 
-          {/* Divider */}
           <div className="text-center text-[13px] text-neutral-600 py-1">
             or
           </div>
 
-          {/* Email + Continue with email form */}
           <form onSubmit={handleContinueWithEmail} className="space-y-3">
             <div className="relative">
               <label
@@ -138,61 +164,240 @@ export default function SignupPage() {
         </div>
       </div>
 
-      {/* Modal — shared for both Google and email flows */}
       {showModal && (
         <div
           className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
-          onClick={() => setShowModal(false)}
+          onClick={() => {
+            setShowModal(false);
+            setSsoStep("email");
+            setModalEmail("");
+            setModalPassword("");
+            setSsoEmailError(false);
+            setSignupError("");
+          }}
         >
           <div
-            className="bg-white rounded-xl shadow-xl p-8 w-[400px]"
+            className="bg-white rounded-lg shadow-xl flex flex-col items-center relative"
             onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "450px",
+              padding: "48px 40px 36px",
+              border: "1px solid #dadce0",
+            }}
           >
-            <div className="flex justify-center mb-4">
-              <div className="w-12 h-12 rounded-full bg-neutral-900 flex items-center justify-center">
-                <KeyRound className="w-6 h-6 text-white" strokeWidth={2} />
-              </div>
+            <button
+              type="button"
+              onClick={() => {
+                setShowModal(false);
+                setSsoStep("email");
+                setModalEmail("");
+                setModalPassword("");
+                setSsoEmailError(false);
+                setSignupError("");
+              }}
+              className="absolute top-4 right-4 text-neutral-500 hover:text-neutral-800 transition-colors p-1"
+              aria-label="Close"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+
+            <div className="mb-6">
+              <Image
+                src="/google.png"
+                alt="Google"
+                width={90}
+                height={30}
+                priority
+              />
             </div>
-            <h2 className="text-xl font-semibold text-center mb-1 text-neutral-900">
-              Continue to Figma
-            </h2>
-            
 
-            <form onSubmit={handleFinalSubmit} className="space-y-3">
-              <input
-                type="email"
-                placeholder="Email"
-                value={modalEmail}
-                onChange={(e) => setModalEmail(e.target.value)}
-                className="w-full border border-neutral-300 rounded-md px-3 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 outline-none focus:border-neutral-900"
-                required
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                value={modalPassword}
-                onChange={(e) => setModalPassword(e.target.value)}
-                className="w-full border border-neutral-300 rounded-md px-3 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 outline-none focus:border-neutral-900"
-                required
-                autoFocus
-              />
+            {ssoStep === "email" ? (
+              <>
+                <h2
+                  className="text-center text-neutral-800"
+                  style={{ fontSize: "24px", fontWeight: 400, lineHeight: "32px" }}
+                >
+                  Sign in
+                </h2>
+                <p
+                  className="text-center text-neutral-700"
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: 400,
+                    lineHeight: "24px",
+                    marginTop: "4px",
+                    marginBottom: "32px",
+                  }}
+                >
+                  with your Google Account
+                </p>
 
-              <div className="flex justify-between items-center pt-3">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="text-neutral-600 text-sm font-medium"
+                <div className="w-full space-y-5">
+                  <div className="relative w-full">
+                    <input
+                      id="sso-email"
+                      type="email"
+                      value={modalEmail}
+                      onChange={(e) => {
+                        setModalEmail(e.target.value);
+                        if (ssoEmailError) setSsoEmailError(false);
+                      }}
+                      onFocus={() => setSsoEmailFocused(true)}
+                      onBlur={() => setSsoEmailFocused(false)}
+                      className={`w-full rounded-md px-4 pt-5 pb-2 text-base text-neutral-900 bg-white border-2 outline-none transition-colors ${
+                        ssoEmailError
+                          ? "border-red-500"
+                          : ssoEmailFocused
+                          ? "border-blue-500"
+                          : "border-neutral-300"
+                      }`}
+                      style={{ height: "56px" }}
+                    />
+                    <label
+                      htmlFor="sso-email"
+                      className={`absolute left-3 bg-white px-1 transition-all duration-200 pointer-events-none ${
+                        ssoEmailFocused || modalEmail
+                          ? "top-0 -translate-y-1/2 text-xs text-blue-500"
+                          : "top-1/2 -translate-y-1/2 text-base text-neutral-500"
+                      }`}
+                    >
+                      Email or phone
+                    </label>
+                  </div>
+
+                  {ssoEmailError && (
+                    <div className="text-left -mt-3">
+                      <span className="text-red-600 text-xs font-medium">
+                        Enter an email or phone number
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="text-left">
+                    <span className="text-blue-600 text-sm font-medium cursor-default select-none">
+                      Forgot email?
+                    </span>
+                  </div>
+
+                  <div className="text-left text-sm text-neutral-600 leading-relaxed">
+                    Not your computer? Use Guest mode to sign in privately.
+                    <br />
+                    <span className="text-blue-600 font-medium cursor-default select-none">
+                      Learn more
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-blue-600 text-sm font-medium cursor-default select-none">
+                      Create account
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!modalEmail.trim()) {
+                          setSsoEmailError(true);
+                          return;
+                        }
+                        setSignupError("");
+                        setSsoStep("password");
+                      }}
+                      className="bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
+                      style={{ padding: "10px 24px" }}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2
+                  className="text-center text-neutral-800"
+                  style={{ fontSize: "24px", fontWeight: 400, lineHeight: "32px" }}
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-neutral-900 text-white text-sm font-medium px-6 py-2 rounded-md hover:bg-neutral-800"
+                  Welcome
+                </h2>
+                <p
+                  className="text-center text-neutral-700"
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: 400,
+                    lineHeight: "24px",
+                    marginTop: "4px",
+                    marginBottom: "32px",
+                  }}
                 >
-                  Continue
-                </button>
-              </div>
-            </form>
+                  {modalEmail}
+                </p>
+
+                <form onSubmit={handleFinalSubmit} className="w-full space-y-4">
+                  <div className="relative w-full">
+                    <input
+                      id="sso-password"
+                      type="password"
+                      value={modalPassword}
+                      onChange={(e) => setModalPassword(e.target.value)}
+                      onFocus={() => setSsoPasswordFocused(true)}
+                      onBlur={() => setSsoPasswordFocused(false)}
+                      className={`w-full rounded-md px-4 pt-5 pb-2 text-base text-neutral-900 bg-white border-2 outline-none transition-colors ${
+                        ssoPasswordFocused ? "border-blue-500" : "border-neutral-300"
+                      }`}
+                      style={{ height: "56px" }}
+                    />
+                    <label
+                      htmlFor="sso-password"
+                      className={`absolute left-3 bg-white px-1 transition-all duration-200 pointer-events-none ${
+                        ssoPasswordFocused || modalPassword
+                          ? "top-0 -translate-y-1/2 text-xs text-blue-500"
+                          : "top-1/2 -translate-y-1/2 text-base text-neutral-500"
+                      }`}
+                    >
+                      Enter your password
+                    </label>
+                  </div>
+
+                  {signupError && (
+                    <div className="text-red-600 text-sm text-center">
+                      {signupError}
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between pt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSsoStep("email");
+                        setSignupError("");
+                      }}
+                      className="text-blue-600 text-sm font-medium hover:bg-blue-50 rounded-md transition-colors"
+                      style={{ padding: "8px 16px" }}
+                    >
+                      Back
+                    </button>
+                    <button
+                      type="submit"
+                      className="bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
+                      style={{ padding: "10px 24px" }}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
           </div>
         </div>
       )}

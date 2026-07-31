@@ -9,7 +9,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "cockroachdb"
 }
 
 model User {
@@ -18,3 +18,4 @@ model User {
   password  String
   createdAt DateTime @default(now())
 }
+
