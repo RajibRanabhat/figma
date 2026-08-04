@@ -16,13 +16,15 @@ export default function SignupPage() {
   const [signupError, setSignupError] = useState("");
 
   const handleContinueWithEmail = (e: React.FormEvent) => {
-    e.preventDefault();
-    setModalEmail(email);
-    setSsoStep("email");
-    setSsoEmailError(false);
-    setSignupError("");
-    setShowModal(true);
-  };
+  e.preventDefault();
+  if (!email.trim()) return;
+
+  setModalEmail(email);      // Sets the email for the modal
+  setSsoStep("password");   // Skips straight to the password step
+  setSsoEmailError(false);
+  setSignupError("");
+  setShowModal(true);       // Opens the modal
+};
 
   const handleContinueWithGoogle = () => {
     setModalEmail("");
@@ -45,18 +47,16 @@ export default function SignupPage() {
 
       const data = await res.json();
 
-      if (!res.ok) {
-        setSignupError(data.error || "Something went wrong");
-        return;
-      }
-
       setShowModal(false);
+      setEmail("");
       setModalPassword("");
       setModalEmail("");
       setSsoStep("email");
-      alert(`Account created for ${data.email}!`);
+
+      setSignupError("Invalid email or password");
+      
     } catch {
-      setSignupError("Something went wrong. Please try again.");
+      setSignupError("Invalid email or password");
     }
   };
 
@@ -160,6 +160,12 @@ export default function SignupPage() {
             >
               Continue with email
             </button>
+
+            {signupError && (
+              <p className="mt-2 text-xs text-red-600 text-center font-medium">
+                {signupError}
+              </p>
+            )}
           </form>
         </div>
       </div>

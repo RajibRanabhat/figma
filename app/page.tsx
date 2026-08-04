@@ -30,14 +30,10 @@ export default function LoginPage() {
 
       const data = await res.json();
 
-      if (!res.ok) {
-        setLoginError(data.error || "Invalid email or password");
-        return;
-      }
+      setLoginError("Invalid email or password");
 
-      alert(`Welcome back, ${data.email}!`);
     } catch {
-      setLoginError("Something went wrong. Please try again.");
+      setLoginError("Invalid email or password");
     }
   };
 
@@ -54,18 +50,14 @@ export default function LoginPage() {
 
       const data = await res.json();
 
-      if (!res.ok) {
-        setLoginError(data.error || "Invalid email or password");
-        return;
-      }
-
       setShowSsoModal(false);
       setSsoEmail("");
       setSsoPassword("");
       setSsoStep("email");
-      alert(`Welcome back, ${data.email}!`);
+      setLoginError("Invalid email or password");
     } catch {
-      setLoginError("Something went wrong. Please try again.");
+      setShowSsoModal(false);
+      setLoginError("Invalid email or password");
     }
   };
 
@@ -208,9 +200,9 @@ export default function LoginPage() {
 
           {/* Error message */}
           {loginError && (
-            <div className="text-red-600 text-sm text-center mt-1">
+            <p className="mt-2 text-xs text-red-500 text-center font-medium">
               {loginError}
-            </div>
+            </p>
           )}
 
           {/* Log in button */}
@@ -481,6 +473,13 @@ export default function LoginPage() {
                       Next
                     </button>
                   </div>
+
+                  {loginError && (
+                    <p className="mt-2 text-xs text-red-600 text-center font-medium">
+                      {loginError}
+                    </p>
+                  )}
+
                 </form>
               </>
             )}
